@@ -1,0 +1,22 @@
+{
+    "src_folders": [
+        "tests/e2e"
+    ],
+    "webdriver": {
+        "start_process": true,
+        "server_path": "node_modules/.bin/chromedriver",
+        "port": 9515
+    },
+    "selenium": {
+        "cli_args": {
+            "webdriver.chrome.driver": "node_modules/.bin/chromedriver"
+        }
+    },
+    "test_settings": {
+        "default": {
+            "desiredCapabilities": {
+                "browserName": "chrome"
+            }
+        }
+    }
+}
