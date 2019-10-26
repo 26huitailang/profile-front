@@ -1,27 +1,42 @@
 <template>
   <div class="goods">
     <el-row class="operations">
-      <el-button type="primary" @click="dialogFormVisible = true">添加</el-button>
+      <el-button
+        type="primary"
+        @click="dialogFormVisible = true"
+      >添加</el-button>
       <el-button type="danger">删除</el-button>
     </el-row>
-    <el-table :data="tableData" style="width: 100%" :row-class-name="tableRowClassName">
-      <el-table-column prop="name" label="名称" width="180"></el-table-column>
-      <el-table-column prop="createdAt" label="创建日期" width="180"></el-table-column>
-      <el-table-column prop="updatedAt" label="更新日期" width="180"></el-table-column>
-      <el-table-column prop="price" label="价格"></el-table-column>
-      <el-table-column prop="category" label="分类"></el-table-column>
-      <el-table-column prop="description" label="描述"></el-table-column>
+    <el-table
+      :data="tableData"
+      style="width: 100%"
+      :row-class-name="tableRowClassName"
+    >
+      <el-table-column prop="name" label="名称" width="180" />
+      <el-table-column
+        prop="createdAt"
+        label="创建日期"
+        width="180"
+      />
+      <el-table-column
+        prop="updatedAt"
+        label="更新日期"
+        width="180"
+      />
+      <el-table-column prop="price" label="价格" />
+      <el-table-column prop="category" label="分类" />
+      <el-table-column prop="description" label="描述" />
     </el-table>
     <el-dialog title="添加物品" :visible.sync="dialogFormVisible">
       <el-form :model="form">
         <el-form-item label="名称" :label-width="formLabelWidth">
-          <el-input v-model="form.name" auto-complete="off"></el-input>
+          <el-input v-model="form.name" auto-complete="off" />
         </el-form-item>
         <el-form-item label="价格" :label-width="formLabelWidth">
-          <el-input v-model="form.price" auto-complete="off"></el-input>
+          <el-input v-model="form.price" auto-complete="off" />
         </el-form-item>
         <el-form-item label="分类" :label-width="formLabelWidth">
-          <el-input v-model="form.category" auto-complete="off"></el-input>
+          <el-input v-model="form.category" auto-complete="off" />
         </el-form-item>
         <el-form-item label="购买日期" :label-width="formLabelWidth">
           <el-date-picker
@@ -29,7 +44,7 @@
             type="date"
             placeholder="购买日期"
             value-format="yyyy-MM-dd"
-          ></el-date-picker>
+          />
         </el-form-item>
         <el-form-item label="过期日期" :label-width="formLabelWidth">
           <el-date-picker
@@ -37,13 +52,16 @@
             type="date"
             placeholder="购买日期"
             value-format="yyyy-MM-dd"
-          ></el-date-picker>
+          />
         </el-form-item>
         <el-form-item label="描述" :label-width="formLabelWidth">
-          <el-input v-model="form.description" auto-complete="off"></el-input>
+          <el-input v-model="form.description" auto-complete="off" />
         </el-form-item>
         <el-form-item label="过期速率/天" :label-width="formLabelWidth">
-          <el-input v-model="form.despreciationRate" auto-complete="off"></el-input>
+          <el-input
+            v-model="form.despreciationRate"
+            auto-complete="off"
+          />
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
@@ -55,46 +73,46 @@
 </template>
 
 <script>
-import { ApiGoods } from "../requests/api.js";
-import { get } from "../requests";
+import { ApiGoods } from '../requests/api.js'
+import { get } from '../requests'
 
 export default {
   data() {
     return {
       tableData: [],
       dialogFormVisible: false,
-      formLabelWidth: "100px",
+      formLabelWidth: '100px',
       form: {
-        name: "",
+        name: '',
         price: 0,
         category: 1,
-        buyAt: "",
-        expireAt: "",
-        description: "",
+        buyAt: '',
+        expireAt: '',
+        description: '',
         despreciationRate: 0
       }
-    };
-  },
-  methods: {
-    tableRowClassName({ row, rowIndex }) {
-      if (rowIndex === 1) {
-        return "warning-row";
-      } else if (rowIndex === 3) {
-        return "success-row";
-      }
-      return "";
-    },
-    addGoodsComfirm() {
-      this.dialogFormVisible = false;
-      console.log("a");
     }
   },
   mounted() {
     get(ApiGoods().Goods).then(response => {
-      this.tableData = response.data;
-    });
+      this.tableData = response.data
+    })
+  },
+  methods: {
+    tableRowClassName({ row, rowIndex }) {
+      if (rowIndex === 1) {
+        return 'warning-row'
+      } else if (rowIndex === 3) {
+        return 'success-row'
+      }
+      return ''
+    },
+    addGoodsComfirm() {
+      this.dialogFormVisible = false
+      console.log('a')
+    }
   }
-};
+}
 </script>
 
 <style lang="scss">
