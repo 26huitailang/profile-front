@@ -1,29 +1,80 @@
 <template>
   <div class="goods">
-    <h1>Goods Page</h1>
+    <el-row class="operations">
+      <el-button type="primary" @click="dialogFormVisible = true">添加</el-button>
+      <el-button type="danger">删除</el-button>
+    </el-row>
     <el-table :data="tableData" style="width: 100%" :row-class-name="tableRowClassName">
-      <el-table-column prop="name" label="姓名" width="180"></el-table-column>
-      <el-table-column prop="createAt" label="创建日期" width="180"></el-table-column>
-      <el-table-column prop="updateAt" label="创建日期" width="180"></el-table-column>
+      <el-table-column prop="name" label="名称" width="180"></el-table-column>
+      <el-table-column prop="createdAt" label="创建日期" width="180"></el-table-column>
+      <el-table-column prop="updatedAt" label="更新日期" width="180"></el-table-column>
       <el-table-column prop="price" label="价格"></el-table-column>
       <el-table-column prop="category" label="分类"></el-table-column>
       <el-table-column prop="description" label="描述"></el-table-column>
     </el-table>
+    <el-dialog title="添加物品" :visible.sync="dialogFormVisible">
+      <el-form :model="form">
+        <el-form-item label="名称" :label-width="formLabelWidth">
+          <el-input v-model="form.name" auto-complete="off"></el-input>
+        </el-form-item>
+        <el-form-item label="价格" :label-width="formLabelWidth">
+          <el-input v-model="form.price" auto-complete="off"></el-input>
+        </el-form-item>
+        <el-form-item label="分类" :label-width="formLabelWidth">
+          <el-input v-model="form.category" auto-complete="off"></el-input>
+        </el-form-item>
+        <el-form-item label="购买日期" :label-width="formLabelWidth">
+          <el-date-picker
+            v-model="form.buyAt"
+            type="date"
+            placeholder="购买日期"
+            value-format="yyyy-MM-dd"
+          ></el-date-picker>
+        </el-form-item>
+        <el-form-item label="过期日期" :label-width="formLabelWidth">
+          <el-date-picker
+            v-model="form.expireAt"
+            type="date"
+            placeholder="购买日期"
+            value-format="yyyy-MM-dd"
+          ></el-date-picker>
+        </el-form-item>
+        <el-form-item label="描述" :label-width="formLabelWidth">
+          <el-input v-model="form.description" auto-complete="off"></el-input>
+        </el-form-item>
+        <el-form-item label="过期速率/天" :label-width="formLabelWidth">
+          <el-input v-model="form.despreciationRate" auto-complete="off"></el-input>
+        </el-form-item>
+      </el-form>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="dialogFormVisible = false">取消</el-button>
+        <el-button type="primary" @click="addGoodsComfirm">确定</el-button>
+      </div>
+    </el-dialog>
   </div>
 </template>
 
-<style>
-.el-table .warning-row {
-  background: oldlace;
-}
-
-.el-table .success-row {
-  background: #f0f9eb;
-}
-</style>
-
 <script>
+import { ApiGoods } from "../requests/api.js";
+import { get } from "../requests";
+
 export default {
+  data() {
+    return {
+      tableData: [],
+      dialogFormVisible: false,
+      formLabelWidth: "100px",
+      form: {
+        name: "",
+        price: 0,
+        category: 1,
+        buyAt: "",
+        expireAt: "",
+        description: "",
+        despreciationRate: 0
+      }
+    };
+  },
   methods: {
     tableRowClassName({ row, rowIndex }) {
       if (rowIndex === 1) {
@@ -32,45 +83,31 @@ export default {
         return "success-row";
       }
       return "";
+    },
+    addGoodsComfirm() {
+      this.dialogFormVisible = false;
+      console.log("a");
     }
   },
-  data() {
-    return {
-      tableData: [
-        {
-          createAt: "2016-05-02",
-          updateAt: "2016-05-02",
-          name: "王小虎",
-          price: 9,
-          category: 1,
-          description: "上海市普陀区金沙江路 1518 弄"
-        },
-        {
-          createAt: "2016-05-04",
-          updateAt: "2016-05-02",
-          name: "王小虎",
-          price: 9,
-          category: 1,
-          description: "上海市普陀区金沙江路 1518 弄"
-        },
-        {
-          createAt: "2016-05-01",
-          updateAt: "2016-05-02",
-          name: "王小虎",
-          price: 9,
-          category: 1,
-          description: "上海市普陀区金沙江路 1518 弄"
-        },
-        {
-          createAt: "2016-05-03",
-          updateAt: "2016-05-02",
-          name: "王小虎",
-          price: 9,
-          category: 1,
-          description: "上海市普陀区金沙江路 1518 弄"
-        }
-      ]
-    };
+  mounted() {
+    get(ApiGoods().Goods).then(response => {
+      this.tableData = response.data;
+    });
   }
 };
 </script>
+
+<style lang="scss">
+.el-table {
+  .warning-row {
+    background: oldlace;
+  }
+  .success-row {
+    background: #f0f9eb;
+  }
+}
+.operations .el-button {
+  margin: 5px;
+  float: left;
+}
+</style>
