@@ -3,11 +3,14 @@ import Mock from 'mockjs'
 const data = Mock.mock({
   'items|30': [{
     id: '@id',
-    title: '@sentence(10, 20)',
-    'status|1': ['published', 'draft', 'deleted'],
-    author: 'name',
+    name: '@word(5, 15)',
+    'status|1': ['using', 'stack', 'deleted'],
+    'category|1': [1, 2],
     display_time: '@datetime',
-    pageviews: '@integer(300, 5000)'
+    price: '@float(1, 20000, 2, 2)',
+    buyAt: '@date',
+    dayPrice: '@float(1, 50, 2, 2)',
+    info: '@cparagraph(1, 3)'
   }]
 })
 
