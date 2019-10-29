@@ -19,23 +19,7 @@
         </template>
       </el-table-column>
       <el-table-column label="类型" width="110" align="center">
-        <template slot-scope="scope" 15413.93
-
-deleted
-
-1993-10-14
-
-商强力治张划心出易心住包。龙层确深委布因立到他来八下色与。九片带矿开利进色志始主过自算保。
-
-1
-
-vemjhxqou
-
-家用电器
-
-1690.06
-
-1690>
+        <template slot-scope="scope">
           <span>{{ scope.row.category | categoryFilter }}</span>
         </template>
       </el-table-column>
