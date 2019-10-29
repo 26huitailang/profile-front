@@ -66,47 +66,51 @@
         </template>
       </el-table-column>
     </el-table>
+
     <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogFormVisible">
       <el-form
         ref="dataForm"
         :rules="rules"
         :model="temp"
         label-position="left"
-        label-width="70px"
+        label-width="90px"
         style="width: 400px; margin-left:50px;"
       >
-        <el-form-item label="Type" prop="type">
-          <el-select v-model="temp.type" class="filter-item" placeholder="Please select">
+        <el-form-item label="名称" prop="name">
+          <el-input v-model="temp.name" />
+        </el-form-item>
+        <el-form-item label="类型" prop="category">
+          <el-select v-model="temp.category" class="filter-item" placeholder="Please select">
             <el-option
-              v-for="item in calendarTypeOptions"
+              v-for="item in deviceTypeOptions"
               :key="item.key"
               :label="item.display_name"
               :value="item.key"
             />
           </el-select>
         </el-form-item>
-        <el-form-item label="Date" prop="timestamp">
-          <el-date-picker v-model="temp.timestamp" type="datetime" placeholder="Please pick a date" />
+        <el-form-item label="购入日期" prop="buyAt">
+          <el-date-picker v-model="temp.buyAt" type="date" value-format="yyyy-MM-dd" placeholder="Please pick a date" />
         </el-form-item>
-        <el-form-item label="Title" prop="title">
-          <el-input v-model="temp.title" />
+        <el-form-item label="购入价格" prop="price">
+          <el-input v-model="temp.price" />
         </el-form-item>
         <el-form-item label="Status">
           <el-select v-model="temp.status" class="filter-item" placeholder="Please select">
-            <el-option v-for="item in statusOptions" :key="item" :label="item" :value="item" />
+            <el-option v-for="item in statusOptions" :key="item.key" :label="item.display_name" :value="item" />
           </el-select>
         </el-form-item>
-        <el-form-item label="Imp">
-          <el-rate
-            v-model="temp.importance"
-            :colors="['#99A9BF', '#F7BA2A', '#FF9900']"
-            :max="3"
-            style="margin-top:8px;"
-          />
-        </el-form-item>
-        <el-form-item label="Remark">
+        <!--        <el-form-item label="Imp">-->
+        <!--          <el-rate-->
+        <!--            v-model="temp.importance"-->
+        <!--            :colors="['#99A9BF', '#F7BA2A', '#FF9900']"-->
+        <!--            :max="3"-->
+        <!--            style="margin-top:8px;"-->
+        <!--          />-->
+        <!--        </el-form-item>-->
+        <el-form-item label="备注">
           <el-input
-            v-model="temp.remark"
+            v-model="temp.info"
             :autosize="{ minRows: 2, maxRows: 4}"
             type="textarea"
             placeholder="Please input"
@@ -126,13 +130,15 @@
 </template>
 
 <script>
-import { getList } from '@/api/table'
+import { getList } from '@/api/device'
 
-const calendarTypeOptions = [
-  { key: 'CN', display_name: 'China' },
-  { key: 'US', display_name: 'USA' },
-  { key: 'JP', display_name: 'Japan' },
-  { key: 'EU', display_name: 'Eurozone' }
+const deviceTypeOptions = [
+  { key: 1, display_name: '电子设备' },
+  { key: 2, display_name: '家用设备' }
+]
+const statusOptions = [
+  { key: 'using', display_name: '使用中' },
+  { key: 'stack', display_name: '收起' }
 ]
 
 export default {
@@ -164,14 +170,14 @@ export default {
       temp: {
         id: undefined,
         importance: 1,
-        remark: '',
-        timestamp: new Date(),
+        info: '',
+        buyAt: '',
         title: '',
-        type: '',
+        category: '',
         status: 'published'
       },
-      calendarTypeOptions,
-      statusOptions: ['published', 'draft', 'deleted'],
+      deviceTypeOptions,
+      statusOptions,
       rules: {
         type: [{ required: true, message: 'type is required', trigger: 'change' }],
         timestamp: [{ type: 'date', required: true, message: 'timestamp is required', trigger: 'change' }],
@@ -194,7 +200,6 @@ export default {
     },
     handleUpdate(row) {
       this.temp = Object.assign({}, row) // copy obj
-      this.temp.timestamp = new Date(this.temp.timestamp)
       this.dialogStatus = 'update'
       this.dialogFormVisible = true
       this.$nextTick(() => {

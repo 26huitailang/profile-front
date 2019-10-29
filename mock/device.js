@@ -6,7 +6,6 @@ const data = Mock.mock({
     name: '@word(5, 15)',
     'status|1': ['using', 'stack'],
     'category|1': [1, 2],
-    display_time: '@datetime',
     price: '@float(1, 20000, 2, 2)',
     buyAt: '@date',
     dayPrice: '@float(1, 50, 2, 2)',
