@@ -4,7 +4,7 @@ const data = Mock.mock({
   'items|30': [{
     id: '@id',
     name: '@word(5, 15)',
-    'status|1': ['using', 'stack', 'deleted'],
+    'status|1': ['using', 'stack'],
     'category|1': [1, 2],
     display_time: '@datetime',
     price: '@float(1, 20000, 2, 2)',
