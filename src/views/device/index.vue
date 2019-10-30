@@ -3,7 +3,7 @@
 
     <div class="filter-container">
       <el-input
-        v-model="listQuery.title"
+        v-model="listQuery.name"
         placeholder="名称"
         style="width: 200px;"
         class="filter-item"
@@ -239,9 +239,9 @@ export default {
       listQuery: {
         page: 1,
         limit: 20,
-        importance: undefined,
-        title: undefined,
-        type: undefined,
+        name: undefined,
+        category: undefined,
+        status: undefined,
         sort: '+id'
       }
     }
