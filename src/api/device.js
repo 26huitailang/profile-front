@@ -2,7 +2,7 @@ import request from '@/utils/request'
 
 const apiV1Goods = '/api/v1/goods'
 
-export function getList(params) {
+export function fetchList(params) {
   return request({
     url: apiV1Goods,
     method: 'get',

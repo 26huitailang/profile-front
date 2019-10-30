@@ -4,24 +4,26 @@
     <div class="filter-container">
       <el-input
         v-model="listQuery.title"
-        placeholder="Title"
+        placeholder="名称"
         style="width: 200px;"
         class="filter-item"
         @keyup.enter.native="handleFilter"
       />
-      <el-select v-model="listQuery.importance" placeholder="Imp" clearable style="width: 90px" class="filter-item">
-        <el-option v-for="item in importanceOptions" :key="item" :label="item" :value="item" />
-      </el-select>
-      <el-select v-model="listQuery.type" placeholder="Type" clearable class="filter-item" style="width: 130px">
+      <el-select v-model="listQuery.category" placeholder="类型" clearable class="filter-item" style="width: 130px">
         <el-option
-          v-for="item in calendarTypeOptions"
+          v-for="item in deviceTypeOptions"
           :key="item.key"
           :label="item.display_name+'('+item.key+')'"
           :value="item.key"
         />
       </el-select>
-      <el-select v-model="listQuery.sort" style="width: 140px" class="filter-item" @change="handleFilter">
-        <el-option v-for="item in sortOptions" :key="item.key" :label="item.label" :value="item.key" />
+      <el-select v-model="listQuery.status" placeholder="状态" clearable class="filter-item" style="width: 130px">
+        <el-option
+          v-for="item in statusOptions"
+          :key="item.key"
+          :label="item.display_name+'('+item.key+')'"
+          :value="item.key"
+        />
       </el-select>
       <el-button v-waves class="filter-item" type="primary" icon="el-icon-search" @click="handleFilter">
         Search
@@ -35,19 +37,6 @@
       >
         Add
       </el-button>
-      <el-button
-        v-waves
-        :loading="downloadLoading"
-        class="filter-item"
-        type="primary"
-        icon="el-icon-download"
-        @click="handleDownload"
-      >
-        Export
-      </el-button>
-      <el-checkbox v-model="showReviewer" class="filter-item" style="margin-left:15px;" @change="tableKey=tableKey+1">
-        reviewer
-      </el-checkbox>
     </div>
 
     <el-table
@@ -83,9 +72,9 @@
           {{ dayPrice(scope.row.buyAt, scope.row.price) }}
         </template>
       </el-table-column>
-      <el-table-column class-name="status-col" label="Status" width="110" align="center">
+      <el-table-column class-name="status-col" label="状态" width="110" align="center">
         <template slot-scope="scope">
-          <el-tag :type="scope.row.status | statusFilter">{{ scope.row.status }}</el-tag>
+          <el-tag :type="scope.row.status | statusFilter">{{ displayStatus(scope.row.status) }}</el-tag>
         </template>
       </el-table-column>
       <el-table-column align="center" prop="created_at" label="购入日期" width="200">
@@ -116,6 +105,14 @@
         </template>
       </el-table-column>
     </el-table>
+
+    <pagination
+      v-show="total>0"
+      :total="total"
+      :page.sync="listQuery.page"
+      :limit.sync="listQuery.limit"
+      @pagination="getList"
+    />
 
     <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogFormVisible">
       <el-form
@@ -180,7 +177,9 @@
 </template>
 
 <script>
-import { getList } from '@/api/device'
+import { fetchList } from '@/api/device'
+import Pagination from '@/components/Pagination' // secondary package based on el-pagination
+import waves from '@/directive/waves' // waves directive
 
 const deviceTypeOptions = [
   { key: 1, display_name: '电子设备' },
@@ -192,6 +191,8 @@ const statusOptions = [
 ]
 
 export default {
+  components: { Pagination },
+  directives: { waves },
   filters: {
     statusFilter(status) {
       const statusMap = {
@@ -210,6 +211,7 @@ export default {
   },
   data() {
     return {
+      total: 0,
       list: null,
       listLoading: true,
       dialogStatus: '',
@@ -246,14 +248,19 @@ export default {
   },
   computed: {},
   created() {
-    this.fetchData()
+    this.getList()
   },
   methods: {
-    fetchData() {
+    getList() {
       this.listLoading = true
-      getList().then(response => {
+      fetchList(this.listQuery).then(response => {
         this.list = response.data.items
-        this.listLoading = false
+        this.total = response.data.total
+
+        // Just to simulate the time of the request
+        setTimeout(() => {
+          this.listLoading = false
+        }, 1.5 * 1000)
       })
     },
     handleUpdate(row) {
@@ -288,7 +295,44 @@ export default {
     },
     handleDelete(row) {
       console.log(row)
+    },
+    handleCreate() {
+      this.resetTemp()
+      this.dialogStatus = 'create'
+      this.dialogFormVisible = true
+      this.$nextTick(() => {
+        this.$refs['dataForm'].clearValidate()
+      })
+    },
+    resetTemp() {
+      this.temp = {
+        id: undefined,
+        info: '',
+        buyAt: new Date(),
+        name: '',
+        status: 'using',
+        category: '',
+        price: 0
+      }
+    },
+    handleFilter() {
+      this.listQuery.page = 1
+      this.getList()
+    },
+    displayStatus: function(key) {
+      for (let i = 0, len = this.statusOptions.length; i < len; i++) {
+        if (this.statusOptions[i].key === key) {
+          return statusOptions[i].display_name
+        }
+      }
+      return ''
     }
   }
 }
 </script>
+
+<style lang="scss" scoped>
+  .filter-container {
+    padding-bottom: 10px;
+  }
+</style>
