@@ -2,6 +2,15 @@
   <div class="app-container">
 
     <div class="filter-container">
+      <el-button
+        class="filter-item"
+        style="margin-left: 10px;"
+        type="primary"
+        icon="el-icon-edit"
+        @click="handleCreate"
+      >
+        新增
+      </el-button>
       <el-input
         v-model="listQuery.name"
         placeholder="名称"
@@ -28,15 +37,6 @@
       <el-button v-waves class="filter-item" type="primary" icon="el-icon-search" @click="handleFilter">
         Search
       </el-button>
-      <el-button
-        class="filter-item"
-        style="margin-left: 10px;"
-        type="primary"
-        icon="el-icon-edit"
-        @click="handleCreate"
-      >
-        Add
-      </el-button>
     </div>
 
     <el-table
@@ -49,7 +49,7 @@
     >
       <el-table-column align="center" width="95">
         <template slot-scope="scope">
-          {{ scope.$index + 1 }}
+          {{ scope.$index + 1 + (listQuery.page - 1) * listQuery.limit }}
         </template>
       </el-table-column>
       <el-table-column align="center" label="固定资产">
@@ -62,7 +62,7 @@
           <span>{{ scope.row.category | categoryFilter }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="购入价格" width="110" align="center">
+      <el-table-column label="购入价格" width="110" align="center" sortable @sort-change="handleSortChange">
         <template slot-scope="scope">
           {{ scope.row.price }}
         </template>
@@ -88,7 +88,7 @@
           {{ scope.row.info }}
         </template>
       </el-table-column>
-      <el-table-column label="Actions" align="center" width="250" class-name="small-padding fixed-width">
+      <el-table-column label="操作" align="center" width="250" class-name="small-padding fixed-width">
         <template slot-scope="{row}">
           <el-button type="primary" size="mini" @click="handleUpdate(row)">
             Edit
@@ -99,7 +99,7 @@
           <el-button v-if="row.status!='stack'" size="mini" @click="handleModifyStatus(row,'stack')">
             Stack
           </el-button>
-          <el-button size="mini" type="danger" @click="handleDelete(row)">
+          <el-button size="mini" type="danger" @click="handleDialogDeleteOpen(row)">
             Delete
           </el-button>
         </template>
@@ -123,10 +123,10 @@
         label-width="90px"
         style="width: 400px; margin-left:50px;"
       >
-        <el-form-item label="名称" prop="name">
+        <el-form-item label="资产名称" prop="name">
           <el-input v-model="temp.name" />
         </el-form-item>
-        <el-form-item label="类型" prop="category">
+        <el-form-item label="资产类型" prop="category">
           <el-select v-model="temp.category" class="filter-item" placeholder="Please select">
             <el-option
               v-for="item in deviceTypeOptions"
@@ -137,7 +137,7 @@
           </el-select>
         </el-form-item>
         <el-form-item label="购入日期" prop="buyAt">
-          <el-date-picker v-model="temp.buyAt" type="date" value-format="yyyy-MM-dd" placeholder="Please pick a date" />
+          <el-date-picker v-model="temp.buyAt" type="date" value-format="yyyy-MM-dd" placeholder="Please pick a date" :picker-options="pickerOptions" />
         </el-form-item>
         <el-form-item label="购入价格" prop="price">
           <el-input v-model="temp.price" />
@@ -147,14 +147,6 @@
             <el-option v-for="item in statusOptions" :key="item.key" :label="item.display_name" :value="item.key" />
           </el-select>
         </el-form-item>
-        <!--        <el-form-item label="Imp">-->
-        <!--          <el-rate-->
-        <!--            v-model="temp.importance"-->
-        <!--            :colors="['#99A9BF', '#F7BA2A', '#FF9900']"-->
-        <!--            :max="3"-->
-        <!--            style="margin-top:8px;"-->
-        <!--          />-->
-        <!--        </el-form-item>-->
         <el-form-item label="备注">
           <el-input
             v-model="temp.info"
@@ -173,6 +165,20 @@
         </el-button>
       </div>
     </el-dialog>
+
+    <el-dialog
+      title="删除"
+      :visible.sync="dialogDeleteVisible"
+      width="30%"
+      :before-close="handleDeleteClose"
+    >
+      <span>是否删除固定资产 {{ deleteTmp.name }}</span>
+      <span slot="footer" class="dialog-footer">
+        <el-button @click="dialogDeleteVisible = false">Cancel</el-button>
+        <el-button type="primary" @click="handleDelete">Confirm</el-button>
+      </span>
+    </el-dialog>
+
   </div>
 </template>
 
@@ -216,8 +222,8 @@ export default {
       listLoading: true,
       dialogStatus: '',
       textMap: {
-        update: 'Edit',
-        create: 'Create'
+        update: '编辑',
+        create: '新增'
       },
       temp: {
         id: undefined,
@@ -231,11 +237,12 @@ export default {
       deviceTypeOptions,
       statusOptions,
       rules: {
-        type: [{ required: true, message: 'type is required', trigger: 'change' }],
-        timestamp: [{ type: 'date', required: true, message: 'timestamp is required', trigger: 'change' }],
-        title: [{ required: true, message: 'title is required', trigger: 'blur' }]
+        name: [{ required: true, message: 'required', trigger: 'change' }],
+        buyAt: [{ type: 'date', required: true, message: 'required', trigger: 'change' }],
+        category: [{ required: true, message: 'required', trigger: 'blur' }]
       },
       dialogFormVisible: false,
+      dialogDeleteVisible: false,
       listQuery: {
         page: 1,
         limit: 20,
@@ -243,6 +250,15 @@ export default {
         category: undefined,
         status: undefined,
         sort: '+id'
+      },
+      pickerOptions: {
+        disabledDate(time) {
+          return time.getTime() > Date.now()
+        }
+      },
+      deleteTmp: {
+        id: undefined,
+        name: undefined
       }
     }
   },
@@ -293,8 +309,17 @@ export default {
       }
       return (price / diff).toFixed(2)
     },
-    handleDelete(row) {
-      console.log(row)
+    handleDialogDeleteOpen(row) {
+      this.deleteTmp.id = row.id
+      this.deleteTmp.name = row.name
+      this.dialogDeleteVisible = true
+    },
+    handleDeleteClose(done) {
+      this.$confirm('你确定希望关闭此次确认吗？')
+        .then(_ => {
+          done()
+        })
+        .catch(_ => {})
     },
     handleCreate() {
       this.resetTemp()
@@ -303,6 +328,9 @@ export default {
       this.$nextTick(() => {
         this.$refs['dataForm'].clearValidate()
       })
+    },
+    handleDelete() {
+      console.log('delete', this.deleteTmp.name, this.deleteTmp.id)
     },
     resetTemp() {
       this.temp = {
@@ -326,6 +354,9 @@ export default {
         }
       }
       return ''
+    },
+    handleSortChange: function(item) {
+      console.log(item)
     }
   }
 }
