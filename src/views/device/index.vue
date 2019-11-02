@@ -46,6 +46,7 @@
       border
       fit
       highlight-current-row
+      @sort-change="handleSortChange"
     >
       <el-table-column align="center" width="95">
         <template slot-scope="scope">
@@ -62,7 +63,7 @@
           <span>{{ scope.row.category | categoryFilter }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="购入价格" width="110" align="center" sortable @sort-change="handleSortChange">
+      <el-table-column label="购入价格" prop="price" width="110" align="center" sortable="custom">
         <template slot-scope="scope">
           {{ scope.row.price }}
         </template>
@@ -77,7 +78,7 @@
           <el-tag :type="scope.row.status | statusFilter">{{ displayStatus(scope.row.status) }}</el-tag>
         </template>
       </el-table-column>
-      <el-table-column align="center" prop="created_at" label="购入日期" width="200">
+      <el-table-column align="center" prop="buyAt" label="购入日期" width="200" sortable="custom">
         <template slot-scope="scope">
           <i class="el-icon-time" />
           <span>{{ scope.row.buyAt }}</span>
@@ -137,7 +138,14 @@
           </el-select>
         </el-form-item>
         <el-form-item label="购入日期" prop="buyAt">
-          <el-date-picker v-model="temp.buyAt" type="date" value-format="yyyy-MM-dd" placeholder="Please pick a date" :picker-options="pickerOptions" />
+          <el-date-picker
+            v-model="temp.buyAt"
+            type="date"
+            format="yyyy-MM-dd"
+            value-format="yyyy-MM-dd"
+            placeholder="Please pick a date"
+            :picker-options="pickerOptions"
+          />
         </el-form-item>
         <el-form-item label="购入价格" prop="price">
           <el-input v-model="temp.price" />
@@ -183,7 +191,7 @@
 </template>
 
 <script>
-import { fetchList } from '@/api/device'
+import { fetchList, create } from '@/api/device'
 import Pagination from '@/components/Pagination' // secondary package based on el-pagination
 import waves from '@/directive/waves' // waves directive
 
@@ -227,7 +235,6 @@ export default {
       },
       temp: {
         id: undefined,
-        importance: 1,
         info: '',
         buyAt: '',
         title: '',
@@ -319,7 +326,8 @@ export default {
         .then(_ => {
           done()
         })
-        .catch(_ => {})
+        .catch(_ => {
+        })
     },
     handleCreate() {
       this.resetTemp()
@@ -333,10 +341,11 @@ export default {
       console.log('delete', this.deleteTmp.name, this.deleteTmp.id)
     },
     resetTemp() {
+      const now = new Date()
       this.temp = {
         id: undefined,
         info: '',
-        buyAt: new Date(),
+        buyAt: now.getFullYear() + '-' + (now.getMonth() + 1) + '-' + now.getDate(),
         name: '',
         status: 'using',
         category: '',
@@ -355,8 +364,24 @@ export default {
       }
       return ''
     },
-    handleSortChange: function(item) {
-      console.log(item)
+    handleSortChange: function(column) {
+      let sort
+      if (column.order === 'ascending') {
+        sort = '+' + column.prop
+      } else if (column.order === 'descending') {
+        sort = '-' + column.prop
+      } else {
+        sort = '+id'
+      }
+      this.listQuery.sort = sort
+      this.getList()
+    },
+    createData: function() {
+      create(this.temp)
+      this.getList()
+    },
+    updateData: function() {
+      console.log('update')
     }
   }
 }

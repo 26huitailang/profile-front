@@ -10,11 +10,19 @@ export function fetchList(params) {
   })
 }
 
+export function create(params) {
+  return request({
+    url: apiV1Goods,
+    method: 'post',
+    data: params
+  })
+}
+
 export function edit(params) {
   return request({
     url: apiV1Goods,
     method: 'put',
-    body: params
+    data: params
   })
 }
 

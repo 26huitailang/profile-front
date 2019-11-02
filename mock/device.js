@@ -1,7 +1,7 @@
 import Mock from 'mockjs'
 
 const List = []
-const count = 100
+const count = 21
 
 for (let i = 0; i < count; i++) {
   List.push(Mock.mock({
@@ -16,8 +16,11 @@ for (let i = 0; i < count; i++) {
 }
 
 function compare(property) {
+  if (!property) {
+    property = '+id'
+  }
   let order = 1
-  if (property.indexOf('-') > 0) {
+  if (property.slice(0, 1) === '-') {
     order = -1
   }
   property = property.slice(1)
@@ -53,8 +56,9 @@ export default [
         if (category && item.category !== parseInt(category)) return false
         return true
       })
-
-      mockList = mockList.sort(compare(sort))
+      if (sort) {
+        mockList = mockList.sort(compare(sort))
+      }
 
       const pageList = mockList.filter((item, index) => index < limit * page && index >= limit * (page - 1))
       return {
@@ -63,6 +67,19 @@ export default [
           total: mockList.length,
           items: pageList
         }
+      }
+    }
+  },
+  {
+    url: '/api/v1/goods', // 新增
+    type: 'post',
+    response: config => {
+      const data = config.body
+      data.id = Mock.mock('@increment')
+      List.push(data)
+      return {
+        code: 20000,
+        data: data
       }
     }
   }
