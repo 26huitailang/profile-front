@@ -95,7 +95,7 @@
             编辑
           </el-button>
           <el-button v-if="row.status!='using'" size="mini" type="success" @click="handleModifyStatus(row,'using')">
-            使用中
+            使用
           </el-button>
           <el-button v-if="row.status!='stack'" size="mini" @click="handleModifyStatus(row,'stack')">
             收起
@@ -200,7 +200,7 @@ const deviceTypeOptions = [
   { key: 2, display_name: '家用设备' }
 ]
 const statusOptions = [
-  { key: 'using', display_name: '使用中' },
+  { key: 'using', display_name: '使用' },
   { key: 'stack', display_name: '收起' }
 ]
 
@@ -295,11 +295,16 @@ export default {
       })
     },
     handleModifyStatus(row, status) {
-      this.$message({
-        message: '操作Success',
-        type: 'success'
-      })
       row.status = status
+      edit(row).then(() => {
+        this.$notify({
+          title: '成功',
+          message: '修改状态成功',
+          type: 'success',
+          duration: 2000
+        })
+        this.getList()
+      })
     },
     dayPrice: function(buyAt, price) {
       // buyAt 2019-11-11, price 10.12
@@ -340,19 +345,13 @@ export default {
       this.listLoading = true
       const tmp = { 'ids': [this.deleteTmp.id] }
       del(tmp).then(response => {
-        console.log(response)
-        if (response.code === 20000) {
-          this.$notify({
-            title: '成功',
-            message: '删除成功',
-            type: 'success',
-            duration: 2000
-          })
-          this.getList()
-        }
-        setTimeout(() => {
-          this.listLoading = false
-        }, 0.5 * 1000)
+        this.$notify({
+          title: '成功',
+          message: '删除成功',
+          type: 'success',
+          duration: 2000
+        })
+        this.getList()
       })
       this.dialogDeleteVisible = false
     },
@@ -409,6 +408,16 @@ export default {
     },
     updateData: function() {
       console.log('update')
+      edit(this.temp).then(response => {
+        this.$notify({
+          title: '成功',
+          message: '修改成功',
+          type: 'success',
+          duration: 2000
+        })
+        this.dialogFormVisible = false
+        this.getList()
+      })
     }
   }
 }

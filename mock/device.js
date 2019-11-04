@@ -98,5 +98,21 @@ export default [
         code: 20000
       }
     }
+  },
+  {
+    url: '/api/v1/goods',
+    type: 'put',
+    response: config => {
+      const data = config.body
+      for (let i = 0; i < List.length; i++) {
+        if (List[i].id === data.id) {
+          List[i] = data
+        }
+      }
+      return {
+        code: 20000,
+        message: '更新成功'
+      }
+    }
   }
 ]
