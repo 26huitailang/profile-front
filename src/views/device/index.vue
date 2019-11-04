@@ -35,7 +35,7 @@
         />
       </el-select>
       <el-button v-waves class="filter-item" type="primary" icon="el-icon-search" @click="handleFilter">
-        Search
+        搜索
       </el-button>
     </div>
 
@@ -92,16 +92,16 @@
       <el-table-column label="操作" align="center" width="250" class-name="small-padding fixed-width">
         <template slot-scope="{row}">
           <el-button type="primary" size="mini" @click="handleUpdate(row)">
-            Edit
+            编辑
           </el-button>
           <el-button v-if="row.status!='using'" size="mini" type="success" @click="handleModifyStatus(row,'using')">
-            Using
+            使用中
           </el-button>
           <el-button v-if="row.status!='stack'" size="mini" @click="handleModifyStatus(row,'stack')">
-            Stack
+            收起
           </el-button>
           <el-button size="mini" type="danger" @click="handleDialogDeleteOpen(row)">
-            Delete
+            删除
           </el-button>
         </template>
       </el-table-column>
@@ -191,7 +191,7 @@
 </template>
 
 <script>
-import { fetchList, create } from '@/api/device'
+import { fetchList, create, del, edit } from '@/api/device'
 import Pagination from '@/components/Pagination' // secondary package based on el-pagination
 import waves from '@/directive/waves' // waves directive
 
@@ -245,7 +245,7 @@ export default {
       statusOptions,
       rules: {
         name: [{ required: true, message: 'required', trigger: 'change' }],
-        buyAt: [{ type: 'date', required: true, message: 'required', trigger: 'change' }],
+        buyAt: [{ required: true, message: 'required', trigger: 'change' }],
         category: [{ required: true, message: 'required', trigger: 'blur' }]
       },
       dialogFormVisible: false,
@@ -283,7 +283,7 @@ export default {
         // Just to simulate the time of the request
         setTimeout(() => {
           this.listLoading = false
-        }, 1.5 * 1000)
+        }, 0.5 * 1000)
       })
     },
     handleUpdate(row) {
@@ -317,8 +317,7 @@ export default {
       return (price / diff).toFixed(2)
     },
     handleDialogDeleteOpen(row) {
-      this.deleteTmp.id = row.id
-      this.deleteTmp.name = row.name
+      this.deleteTmp = row
       this.dialogDeleteVisible = true
     },
     handleDeleteClose(done) {
@@ -338,7 +337,24 @@ export default {
       })
     },
     handleDelete() {
-      console.log('delete', this.deleteTmp.name, this.deleteTmp.id)
+      this.listLoading = true
+      const tmp = { 'ids': [this.deleteTmp.id] }
+      del(tmp).then(response => {
+        console.log(response)
+        if (response.code === 20000) {
+          this.$notify({
+            title: '成功',
+            message: '删除成功',
+            type: 'success',
+            duration: 2000
+          })
+          this.getList()
+        }
+        setTimeout(() => {
+          this.listLoading = false
+        }, 0.5 * 1000)
+      })
+      this.dialogDeleteVisible = false
     },
     resetTemp() {
       const now = new Date()
@@ -376,9 +392,20 @@ export default {
       this.listQuery.sort = sort
       this.getList()
     },
-    createData: function() {
-      create(this.temp)
-      this.getList()
+    createData() {
+      this.$refs['dataForm'].validate((valid) => {
+        if (valid) {
+          create(this.temp)
+          this.dialogFormVisible = false
+          this.$refs['dataForm'].resetFields()
+          this.getList()
+        } else {
+          this.$message({
+            'type': 'warning',
+            'message': '请完成表单'
+          })
+        }
+      })
     },
     updateData: function() {
       console.log('update')

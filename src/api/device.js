@@ -30,6 +30,6 @@ export function del(params) {
   return request({
     url: apiV1Goods,
     method: 'delete',
-    params: params
+    data: params
   })
 }

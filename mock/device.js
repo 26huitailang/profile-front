@@ -82,5 +82,21 @@ export default [
         data: data
       }
     }
+  },
+  {
+    url: '/api/v1/goods',
+    type: 'delete',
+    response: config => {
+      const ids = config.body.ids
+      let i = List.length
+      while (i--) {
+        if (ids.indexOf(List[i].id) >= 0) {
+          List.splice(i, 1)
+        }
+      }
+      return {
+        code: 20000
+      }
+    }
   }
 ]
