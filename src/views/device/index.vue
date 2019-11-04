@@ -70,7 +70,7 @@
       </el-table-column>
       <el-table-column label="日费用" width="110" align="center">
         <template slot-scope="scope">
-          {{ dayPrice(scope.row.buyAt, scope.row.price) }}
+          {{ dayPrice(scope.row) }}
         </template>
       </el-table-column>
       <el-table-column class-name="status-col" label="状态" width="110" align="center">
@@ -306,20 +306,21 @@ export default {
         this.getList()
       })
     },
-    dayPrice: function(buyAt, price) {
+    dayPrice: function(row) {
       // buyAt 2019-11-11, price 10.12
-      const sDate = buyAt.split('-')
-      const newBuyAt = new Date(sDate[0], sDate[1], sDate[2])
+      const sDate = row.buyAt.split('-')
+      const newBuyAt = new Date(parseInt(sDate[0]), parseInt(sDate[1]) - 1, parseInt(sDate[2]))
       const currentDate = new Date()
-      const newCurrentDate = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, currentDate.getDate())
+      const newCurrentDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate() + 1) // 算上当天的时间
 
       let diff = Math.abs((newCurrentDate - newBuyAt) / 1000 / 60 / 60 / 24)
-
+      console.log(newCurrentDate, newBuyAt)
+      console.log('diff', row.name, diff)
       // let denominator gt 0
       if (diff === 0) {
         diff = 1
       }
-      return (price / diff).toFixed(2)
+      return (row.price / diff).toFixed(2)
     },
     handleDialogDeleteOpen(row) {
       this.deleteTmp = row
