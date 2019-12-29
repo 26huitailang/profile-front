@@ -296,7 +296,7 @@ export default {
     },
     handleModifyStatus(row, status) {
       row.status = status
-      edit(row).then(() => {
+      edit(row.id, row).then(() => {
         this.$notify({
           title: '成功',
           message: '修改状态成功',
@@ -409,7 +409,7 @@ export default {
     },
     updateData: function() {
       console.log('update')
-      edit(this.temp).then(response => {
+      edit(this.temp.id, this.temp).then(response => {
         this.$notify({
           title: '成功',
           message: '修改成功',

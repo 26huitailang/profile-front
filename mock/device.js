@@ -45,7 +45,7 @@ function compare(property) {
 
 export default [
   {
-    url: '/api/v1/goods',
+    url: '/api/v1/devices',
     type: 'get',
     response: config => {
       const { name, status, category, page = 1, limit = 20, sort } = config.query
@@ -71,7 +71,7 @@ export default [
     }
   },
   {
-    url: '/api/v1/goods', // 新增
+    url: '/api/v1/devices', // 新增
     type: 'post',
     response: config => {
       const data = config.body
@@ -84,7 +84,7 @@ export default [
     }
   },
   {
-    url: '/api/v1/goods',
+    url: '/api/v1/devices',
     type: 'delete',
     response: config => {
       const ids = config.body.ids
@@ -100,7 +100,7 @@ export default [
     }
   },
   {
-    url: '/api/v1/goods',
+    url: '/api/v1/devices/([0-9]+)',
     type: 'put',
     response: config => {
       const data = config.body
