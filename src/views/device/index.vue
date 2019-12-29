@@ -142,7 +142,6 @@
             v-model="temp.buyAt"
             type="date"
             format="yyyy-MM-dd"
-            value-format="yyyy-MM-dd"
             placeholder="Please pick a date"
             :picker-options="pickerOptions"
           />
@@ -361,7 +360,7 @@ export default {
       this.temp = {
         id: undefined,
         info: '',
-        buyAt: now.getFullYear() + '-' + (now.getMonth() + 1) + '-' + now.getDate(),
+        buyAt: now.getFullYear() + '-' + (now.getMonth() + 1) + '-' + now.getDate() + 'T00:00:00Z00:00',
         name: '',
         status: 'using',
         category: '',

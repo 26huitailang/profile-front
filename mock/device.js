@@ -71,7 +71,7 @@ export default [
     }
   },
   {
-    url: '/api/v1/devices', // 新增
+    url: '/api/v1/device', // 新增
     type: 'post',
     response: config => {
       const data = config.body
