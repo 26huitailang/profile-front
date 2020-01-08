@@ -315,8 +315,6 @@ export default {
 
       let diff = Math.floor((nowTS - startTS) / 1000 / 60 / 60 / 24)
 
-      console.log(startTS, nowTS)
-      console.log('diff', row.name, diff)
       // let denominator gt 0
       if (diff === 0) {
         diff = 1
@@ -395,10 +393,8 @@ export default {
     createData() {
       this.$refs['dataForm'].validate((valid) => {
         if (valid) {
-          console.log(this.temp)
           create(this.temp)
           this.dialogFormVisible = false
-          // this.$refs['dataForm'].resetFields()
           this.getList()
         } else {
           this.$message({
