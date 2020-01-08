@@ -81,12 +81,12 @@
       <el-table-column align="center" prop="buyAt" label="购入日期" width="200" sortable="custom">
         <template slot-scope="scope">
           <i class="el-icon-time" />
-          <span>{{ scope.row.buyAt }}</span>
+          <span>{{ scope.row.buyAt | formatDate("YY-MM-DD") }}</span>
         </template>
       </el-table-column>
       <el-table-column label="备注" width="150" :show-tooltip-when-overflow="true" header-align="center">
         <template slot-scope="scope">
-          {{ scope.row.info }}
+          {{ scope.row.description }}
         </template>
       </el-table-column>
       <el-table-column label="操作" align="center" width="250" class-name="small-padding fixed-width">
@@ -141,7 +141,7 @@
           <el-date-picker
             v-model="temp.buyAt"
             type="date"
-            format="yyyy-MM-dd"
+            value-format="timestamp"
             placeholder="Please pick a date"
             :picker-options="pickerOptions"
           />
@@ -156,7 +156,7 @@
         </el-form-item>
         <el-form-item label="备注">
           <el-input
-            v-model="temp.info"
+            v-model="temp.description"
             :autosize="{ minRows: 2, maxRows: 4}"
             type="textarea"
             placeholder="Please input"
@@ -193,6 +193,7 @@
 import { fetchList, create, del, edit } from '@/api/device'
 import Pagination from '@/components/Pagination' // secondary package based on el-pagination
 import waves from '@/directive/waves' // waves directive
+import { nowTimestamp, formatTimeStamp } from '@/utils/time'
 
 const deviceTypeOptions = [
   { key: 1, display_name: '电子设备' },
@@ -220,7 +221,8 @@ export default {
         2: '家用电器'
       }
       return statusMap[status]
-    }
+    },
+    formatDate: formatTimeStamp,
   },
   data() {
     return {
@@ -234,11 +236,12 @@ export default {
       },
       temp: {
         id: undefined,
-        info: '',
-        buyAt: '',
+        description: '',
+        buyAt: nowTimestamp(),
         title: '',
         category: '',
-        status: 'published'
+        status: 'published',
+        price: 0
       },
       deviceTypeOptions,
       statusOptions,
@@ -276,8 +279,8 @@ export default {
     getList() {
       this.listLoading = true
       fetchList(this.listQuery).then(response => {
-        this.list = response.data.items
-        this.total = response.data.total
+        this.list = response.data
+        this.total = response.data.length
 
         // Just to simulate the time of the request
         setTimeout(() => {
@@ -306,14 +309,13 @@ export default {
       })
     },
     dayPrice: function(row) {
-      // buyAt 2019-11-11, price 10.12
-      const sDate = row.buyAt.split('-')
-      const newBuyAt = new Date(parseInt(sDate[0]), parseInt(sDate[1]) - 1, parseInt(sDate[2]))
-      const currentDate = new Date()
-      const newCurrentDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate() + 1) // 算上当天的时间
+      // buyAt 1578425330571, price 10.12
+      const startTS = row.buyAt
+      const nowTS = nowTimestamp()
 
-      let diff = Math.abs((newCurrentDate - newBuyAt) / 1000 / 60 / 60 / 24)
-      console.log(newCurrentDate, newBuyAt)
+      let diff = Math.floor((nowTS - startTS) / 1000 / 60 / 60 / 24)
+
+      console.log(startTS, nowTS)
       console.log('diff', row.name, diff)
       // let denominator gt 0
       if (diff === 0) {
@@ -356,11 +358,10 @@ export default {
       this.dialogDeleteVisible = false
     },
     resetTemp() {
-      const now = new Date()
       this.temp = {
         id: undefined,
-        info: '',
-        buyAt: now.getFullYear() + '-' + (now.getMonth() + 1) + '-' + now.getDate() + 'T00:00:00Z00:00',
+        description: '',
+        buyAt: nowTimestamp(),
         name: '',
         status: 'using',
         category: '',
@@ -394,9 +395,10 @@ export default {
     createData() {
       this.$refs['dataForm'].validate((valid) => {
         if (valid) {
+          console.log(this.temp)
           create(this.temp)
           this.dialogFormVisible = false
-          this.$refs['dataForm'].resetFields()
+          // this.$refs['dataForm'].resetFields()
           this.getList()
         } else {
           this.$message({
